@@ -1,20 +1,81 @@
-import React,{useState} from 'react';
+import React,{useState,useEffect} from 'react';
 import marked from 'marked';
 import '../static/css/addArticle.css';
 import { Row,Col,Input, Select ,Button ,DatePicker } from 'antd';
 const { Option } = Select;
 const { TextArea } = Input;
+
+
 function AddArticle():JSX.Element {
+    const [articleId,setArticleId] = useState(0)  // 文章的ID，如果是0说明是新增加，如果不是0，说明是修改
+    const [articleTitle,setArticleTitle] = useState('')   //文章标题
+    const [articleContent , setArticleContent] = useState('')  //markdown的编辑内容
+    const [markdownContent, setMarkdownContent] = useState('预览内容') //html内容
+    const [introducemd,setIntroducemd] = useState()            //简介的markdown内容
+    const [introducehtml,setIntroducehtml] = useState('等待编辑') //简介的html内容
+    const [showDate,setShowDate] = useState()   //发布日期
+    const [updateDate,setUpdateDate] = useState() //修改日志的日期
+    const [typeInfo ,setTypeInfo] = useState([]) // 文章类别信息
+    const [selectedType,setSelectType] = useState(1) //选择的文章类别
     const updateActicel =()=> {
 
     }
+
+    const changeTitle = (e: any) => {
+        setArticleTitle(e.target.value)
+        sessionStorage.setItem("title",JSON.stringify(e.target.value))
+    }   
+
+    const changeContent = (e:any) => {
+        setArticleContent(e.target.value)
+        let html = marked(e.target.value)
+        sessionStorage.setItem("marked",JSON.stringify(e.target.value))
+        setMarkdownContent(html)
+    }
+
+    const changeIntroduce = (e:any)=>{
+        setIntroducemd(e.target.value)
+        let html = marked(e.target.value)
+        sessionStorage.setItem("introduce",JSON.stringify(e.target.value))
+        setIntroducehtml(html)
+    }
+
+    useEffect(() => {
+        let marked_1 = sessionStorage.getItem("marked");
+        let marked_2 = sessionStorage.getItem("introduce");
+        let marked_3 = sessionStorage.getItem("title");
+        let html_1 = typeof marked_1 === 'string' ? JSON.parse(marked_1) : '';
+        let html_2 = typeof marked_2 === 'string' ? JSON.parse(marked_2) : '';
+        let html_3 = typeof marked_3 === 'string' ? JSON.parse(marked_3) : '';
+        setArticleContent(html_1)
+        setMarkdownContent(marked(html_1))
+        setIntroducemd(html_2)
+        setIntroducehtml(marked(html_2))
+        setArticleTitle(html_3)
+    },[])
+    
+    marked.setOptions({
+        renderer: new marked.Renderer(),
+        gfm: true,
+        pedantic: false,
+        sanitize: false,
+        breaks: false,
+        smartLists: true,
+        smartypants: false,
+    });
     return (
         <div>
             <Row gutter={5}>
                 <Col span={18}>
                     <Row gutter={10}>
                         <Col span={20}>
-                            <Input placeholder="博客标题" size="large" />
+                            <Input 
+                                value={articleTitle} 
+                                onChange={changeTitle} 
+                                onPressEnter={changeTitle}
+                                placeholder="博客标题" 
+                                size="large" 
+                            />
                         </Col>
                         <Col span={4}>
                             &nbsp;
@@ -30,11 +91,17 @@ function AddArticle():JSX.Element {
                             <TextArea  
                                 className="markdown-content" 
                                 rows={35}
+                                value={articleContent} 
+                                onChange={changeContent} 
+                                onPressEnter={changeContent}
                                 placeholder="文章内容"
                             />
                         </Col>
                         <Col span={12}>
-                            <div className="show-html">
+                            <div 
+                                className="show-html"
+                                dangerouslySetInnerHTML = {{__html:markdownContent}}
+                            >
                             </div>
                         </Col>
                     </Row>
@@ -49,11 +116,17 @@ function AddArticle():JSX.Element {
                         <Col span={24}>
                             <br />
                             <TextArea 
-                                rows={4}
+                                rows={4} 
+                                value={introducemd}  
+                                onChange={changeIntroduce} 
+                                onPressEnter={changeIntroduce}
                                 placeholder="文章简介"
                             />
                             <br /><br />
-                            <div className="introduce-html"></div>
+                            <div 
+                                className="introduce-html"
+                                dangerouslySetInnerHTML = {{__html:'文章简介：'+introducehtml}}
+                            ></div>
                         </Col>
                         <Col span={12}>
                             <div className="date-select">
