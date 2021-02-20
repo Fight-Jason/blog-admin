@@ -1,6 +1,8 @@
 import React,{ useState } from 'react'
 import { Layout, Menu, Breadcrumb } from 'antd'
-import '../static/css/index.css'
+import { Route } from "react-router-dom";
+import '../static/css/index.css';
+import AddArticle from './addArticle'
 import {
     PieChartOutlined,
     DesktopOutlined,
@@ -28,7 +30,7 @@ function Index() {
                     </Menu.Item>
                     <Menu.Item key="2">
                         <DesktopOutlined />
-                        <span>工作台</span>
+                        <span>添加文章</span>
                     </Menu.Item>
                     <SubMenu
                         key="sub1"
@@ -55,7 +57,9 @@ function Index() {
                         <Breadcrumb.Item>后台管理</Breadcrumb.Item>
                         <Breadcrumb.Item>工作台</Breadcrumb.Item>
                     </Breadcrumb>
-                    <div style={{ padding: 24, background: '#fff', minHeight: 360 }}>博客工作台.</div>
+                    <div style={{ padding: 24, background: '#fff', minHeight: 360 }}> 
+                        <Route path="/index/" exact component={AddArticle} />
+                    </div>
                 </Content>
                 <Footer style={{ textAlign: 'center' }}>Jason.com</Footer>
             </Layout>
