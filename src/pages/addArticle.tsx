@@ -5,13 +5,15 @@ import { Row,Col,Input, Select ,Button ,DatePicker } from 'antd';
 const { Option } = Select;
 const { TextArea } = Input;
 
+type IsEvent = React.ChangeEvent<HTMLInputElement> |  React.KeyboardEvent<HTMLInputElement>
+type IsTextArea = React.ChangeEvent<HTMLTextAreaElement> | React.KeyboardEvent<HTMLTextAreaElement>
 
 function AddArticle():JSX.Element {
     const [articleId,setArticleId] = useState(0)  // 文章的ID，如果是0说明是新增加，如果不是0，说明是修改
     const [articleTitle,setArticleTitle] = useState('')   //文章标题
     const [articleContent , setArticleContent] = useState('')  //markdown的编辑内容
     const [markdownContent, setMarkdownContent] = useState('预览内容') //html内容
-    const [introducemd,setIntroducemd] = useState()            //简介的markdown内容
+    const [introducemd,setIntroducemd] = useState('')            //简介的markdown内容
     const [introducehtml,setIntroducehtml] = useState('等待编辑') //简介的html内容
     const [showDate,setShowDate] = useState()   //发布日期
     const [updateDate,setUpdateDate] = useState() //修改日志的日期
@@ -21,22 +23,25 @@ function AddArticle():JSX.Element {
 
     }
 
-    const changeTitle = (e: any) => {
-        setArticleTitle(e.target.value)
-        sessionStorage.setItem("title",JSON.stringify(e.target.value))
+    const changeTitle = (e: IsEvent) => {
+        let value = (e.target as HTMLInputElement).value;
+        setArticleTitle(value)
+        sessionStorage.setItem("title",JSON.stringify(value))
     }   
 
-    const changeContent = (e:any) => {
-        setArticleContent(e.target.value)
-        let html = marked(e.target.value)
-        sessionStorage.setItem("marked",JSON.stringify(e.target.value))
+    const changeContent = (e:IsTextArea) => {
+        let value = (e.target as HTMLTextAreaElement).value;
+        setArticleContent(value)
+        let html = marked(value)
+        sessionStorage.setItem("marked",JSON.stringify(value))
         setMarkdownContent(html)
     }
 
-    const changeIntroduce = (e:any)=>{
-        setIntroducemd(e.target.value)
-        let html = marked(e.target.value)
-        sessionStorage.setItem("introduce",JSON.stringify(e.target.value))
+    const changeIntroduce = (e:IsTextArea)=>{
+        let value = (e.target as HTMLTextAreaElement).value;
+        setIntroducemd(value)
+        let html = marked(value)
+        sessionStorage.setItem("introduce",JSON.stringify(value))
         setIntroducehtml(html)
     }
 
