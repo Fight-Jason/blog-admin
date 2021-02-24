@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from 'react';
 import marked from 'marked';
 import '../static/css/addArticle.css';
-import { Row,Col,Input, Select ,Button ,DatePicker } from 'antd';
+import { Row,Col,Input, Select ,Button ,DatePicker, message } from 'antd';
 import axios from 'axios'
 import servicePath  from '../config/apiUrl'
 
@@ -18,6 +18,15 @@ type IsSelectedValue = {
     typeName: string
 }
 
+type IsdataProps = {
+    type_id: number,
+    title: string,
+    article_content: string,
+    introduce: string,
+    addTime?: number,
+    view_count?: number
+}
+
 function AddArticle(props:any):JSX.Element {
     const [articleId,setArticleId] = useState(0)  // 文章的ID，如果是0说明是新增加，如果不是0，说明是修改
     const [articleTitle,setArticleTitle] = useState('')   //文章标题
@@ -25,7 +34,7 @@ function AddArticle(props:any):JSX.Element {
     const [markdownContent, setMarkdownContent] = useState('预览内容') //html内容
     const [introducemd,setIntroducemd] = useState('')            //简介的markdown内容
     const [introducehtml,setIntroducehtml] = useState('等待编辑') //简介的html内容
-    const [showDate,setShowDate] = useState()   //发布日期
+    const [showDate,setShowDate] = useState('')   //发布日期
     const [updateDate,setUpdateDate] = useState() //修改日志的日期
     const [typeInfo ,setTypeInfo] = useState([]) // 文章类别信息
     const [selectedType,setSelectType] = useState(1) //选择的文章类别
@@ -36,14 +45,12 @@ function AddArticle(props:any):JSX.Element {
     const changeTitle = (e: IsEvent) => {
         let value = (e.target as HTMLInputElement).value;
         setArticleTitle(value)
-        sessionStorage.setItem("title",JSON.stringify(value))
     }   
 
     const changeContent = (e:IsTextArea) => {
         let value = (e.target as HTMLTextAreaElement).value;
         setArticleContent(value)
         let html = marked(value)
-        sessionStorage.setItem("marked",JSON.stringify(value))
         setMarkdownContent(html)
     }
 
@@ -51,13 +58,58 @@ function AddArticle(props:any):JSX.Element {
         let value = (e.target as HTMLTextAreaElement).value;
         setIntroducemd(value)
         let html = marked(value)
-        sessionStorage.setItem("introduce",JSON.stringify(value))
         setIntroducehtml(html)
     }
 
     const selectTypeHandler = (value:number) => {
         setSelectType(value)
-    } 
+    }
+    
+    const saveArticle = ()=>{
+        if(!selectedType){
+            message.error('必须选择文章类别')
+            return false
+        }else if(!articleTitle){
+            message.error('文章名称不能为空')
+            return false
+        }else if(!articleContent){
+            message.error('文章内容不能为空')
+            return false
+        }else if(!introducemd){
+            message.error('简介不能为空')
+            return false
+        }else if(!showDate){
+            message.error('发布日期不能为空')
+            return false
+        }
+
+        let datetext= showDate.replace('-','/') //把字符串转换成时间戳
+        let dataProps: IsdataProps = {
+            type_id: selectedType,
+            title: articleTitle,
+            article_content: articleContent,
+            introduce: introducemd,
+            addTime: (new Date(datetext).getTime())/1000
+        }   //传递到接口的参数
+
+        if(!articleId) {
+            dataProps.view_count = 0;
+            axios({
+                method: 'post',
+                url: servicePath.addArticle,
+                data: dataProps,
+                withCredentials: true
+            }).then(res => {
+                setArticleId(res.data.insertId)
+                if(res.data.isSuccess) {
+                    message.success('文章保存成功')
+                } else {
+                    message.error('文章保存失败')
+                }
+            })
+        }
+    }
+
 
     //从中台得到文章类别信息
     const getTypeInfo =()=>{
@@ -77,17 +129,17 @@ function AddArticle(props:any):JSX.Element {
     }
 
     useEffect(() => {
-        let marked_1 = sessionStorage.getItem("marked");
-        let marked_2 = sessionStorage.getItem("introduce");
-        let marked_3 = sessionStorage.getItem("title");
-        let html_1 = typeof marked_1 === 'string' ? JSON.parse(marked_1) : '';
-        let html_2 = typeof marked_2 === 'string' ? JSON.parse(marked_2) : '';
-        let html_3 = typeof marked_3 === 'string' ? JSON.parse(marked_3) : '';
-        setArticleContent(html_1)
-        setMarkdownContent(marked(html_1))
-        setIntroducemd(html_2)
-        setIntroducehtml(marked(html_2))
-        setArticleTitle(html_3)
+        // let marked_1 = sessionStorage.getItem("marked");
+        // let marked_2 = sessionStorage.getItem("introduce");
+        // let marked_3 = sessionStorage.getItem("title");
+        // let html_1 = typeof marked_1 === 'string' ? JSON.parse(marked_1) : '';
+        // let html_2 = typeof marked_2 === 'string' ? JSON.parse(marked_2) : '';
+        // let html_3 = typeof marked_3 === 'string' ? JSON.parse(marked_3) : '';
+        // setArticleContent(html_1)
+        // setMarkdownContent(marked(html_1))
+        // setIntroducemd(html_2)
+        // setIntroducehtml(marked(html_2))
+        // setArticleTitle(html_3)
         getTypeInfo() 
     },[])
     
@@ -108,7 +160,7 @@ function AddArticle(props:any):JSX.Element {
                         <Col span={20}>
                             <Input 
                                 value={articleTitle} 
-                                onChange={changeTitle} 
+                                onChange={e=> setArticleTitle(e.target.value)} 
                                 onPressEnter={changeTitle}
                                 placeholder="博客标题" 
                                 size="large" 
@@ -149,9 +201,9 @@ function AddArticle(props:any):JSX.Element {
                 <Col span={6}>
                     <Row>
                         <Col span={24}>
-                            <Button size="large">暂存文章</Button>&nbsp;
-                            <Button type="primary" size="large" onClick={updateActicel}>发布文章</Button>
-                            <br />
+                            <Button  size="large">暂存文章</Button>&nbsp;
+                            <Button type="primary" size="large" onClick={saveArticle}>发布文章</Button>
+                            <br/>
                         </Col>
                         <Col span={24}>
                             <br />
@@ -170,7 +222,8 @@ function AddArticle(props:any):JSX.Element {
                         </Col>
                         <Col span={12}>
                             <div className="date-select">
-                                <DatePicker 
+                                <DatePicker
+                                    onChange={(date,dateString)=>setShowDate(dateString)}
                                     placeholder="发布日期"
                                     size="large"
                                 />
