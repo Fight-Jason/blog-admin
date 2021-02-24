@@ -2,13 +2,23 @@ import React,{useState,useEffect} from 'react';
 import marked from 'marked';
 import '../static/css/addArticle.css';
 import { Row,Col,Input, Select ,Button ,DatePicker } from 'antd';
+import axios from 'axios'
+import servicePath  from '../config/apiUrl'
+
 const { Option } = Select;
 const { TextArea } = Input;
 
 type IsEvent = React.ChangeEvent<HTMLInputElement> |  React.KeyboardEvent<HTMLInputElement>
 type IsTextArea = React.ChangeEvent<HTMLTextAreaElement> | React.KeyboardEvent<HTMLTextAreaElement>
 
-function AddArticle():JSX.Element {
+type IsSelectedValue = {
+    id: number,
+    icon: string,
+    orderNum: number,
+    typeName: string
+}
+
+function AddArticle(props:any):JSX.Element {
     const [articleId,setArticleId] = useState(0)  // 文章的ID，如果是0说明是新增加，如果不是0，说明是修改
     const [articleTitle,setArticleTitle] = useState('')   //文章标题
     const [articleContent , setArticleContent] = useState('')  //markdown的编辑内容
@@ -45,6 +55,27 @@ function AddArticle():JSX.Element {
         setIntroducehtml(html)
     }
 
+    const selectTypeHandler = (value:number) => {
+        setSelectType(value)
+    } 
+
+    //从中台得到文章类别信息
+    const getTypeInfo =()=>{
+        axios({
+            method: 'get',
+            url: servicePath.getTypeInfo,
+            headers: { 'Access-Control-Allow-Origin':'*' },
+            withCredentials: true   
+        }).then(res => {
+            if(res.data.data=="没有登录"){
+                localStorage.removeItem('openId')
+                props.history.push('/')  
+            }else{
+                setTypeInfo(res.data.data)
+            }   
+        })
+    }
+
     useEffect(() => {
         let marked_1 = sessionStorage.getItem("marked");
         let marked_2 = sessionStorage.getItem("introduce");
@@ -57,6 +88,7 @@ function AddArticle():JSX.Element {
         setIntroducemd(html_2)
         setIntroducehtml(marked(html_2))
         setArticleTitle(html_3)
+        getTypeInfo() 
     },[])
     
     marked.setOptions({
@@ -84,9 +116,12 @@ function AddArticle():JSX.Element {
                         </Col>
                         <Col span={4}>
                             &nbsp;
-                            <Select defaultValue="Sing Up" size="large">
-                                <Option value="JavaScript">JavaScript</Option>
-                                <Option value="Node.js">Node.js</Option>
+                            <Select defaultValue={selectedType} size="large" onChange={selectTypeHandler}>
+                                {
+                                    typeInfo.map((item:IsSelectedValue,index)=>{
+                                        return (<Option key={index} value={item.id}>{item.typeName}</Option>)
+                                    })
+                                }
                             </Select>
                         </Col>
                     </Row>

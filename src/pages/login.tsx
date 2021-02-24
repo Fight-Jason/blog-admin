@@ -1,21 +1,55 @@
-import React , {useState} from 'react';
+import React , {useState, useEffect} from 'react';
 import 'antd/dist/antd.css';
-import { Card, Input ,Button ,Spin } from 'antd';
+import { Card, Input ,Button ,Spin, message } from 'antd';
 import {
     UserOutlined,
     KeyOutlined
 } from '@ant-design/icons';
+import axios from 'axios'
+import servicePath  from '../config/apiUrl'
 import '../static/css/login.css'
-function Login() :JSX.Element{
+
+function Login(props:any) :JSX.Element{
     const [userName , setUserName] = useState<string>();
     const [password , setPassword] = useState<string>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [typeInfo ,setTypeInfo] = useState([]) // 文章类别信息
+
     const checkLogin = ()=> {
+        if(!userName) {
+            return message.error('用户名不能为空')  
+        } else if (!password) {
+            return message.error('密码不能为空') 
+        }
+        let dataProps = {
+            'userName':userName,
+            'password':password  
+        }
         setIsLoading(true)
-        setTimeout(()=> {
+        axios({
+            method:'post',
+            url:servicePath.checkLogin,
+            data:dataProps,
+            withCredentials: true
+        }).then(
+           res=>{
+                setIsLoading(false)
+                if(res.data.data =='登录成功'){
+                    localStorage.setItem('openId',res.data.openId)
+                    
+                    props.history.push('/index')
+                }else{
+                    message.error('用户名密码错误')
+                }
+           }
+        )
+        setTimeout(()=>{
             setIsLoading(false)
         },1000)
     }
+    useEffect(()=>{
+
+    },[])
     return (
         <div className="login-div">
              <Spin tip="loading..." spinning={isLoading}>
@@ -28,7 +62,7 @@ function Login() :JSX.Element{
                         onChange={(e)=> setUserName(e.target.value)}
                     />
                     <br /><br />
-                    <Input 
+                    <Input.Password 
                         id="password"
                         size="large"
                         placeholder="Enter your password"
