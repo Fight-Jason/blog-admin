@@ -1,33 +1,24 @@
-import React,{useState,useEffect} from 'react';
+import React,{ 
+    useState,
+    useEffect, 
+    MouseEvent, 
+    KeyboardEvent,
+    ChangeEvent,
+     
+} from 'react';
+import { PageProps } from '../interfaces/index'
 import marked from 'marked';
-import '../static/css/addArticle.css';
+import '../static/css/addArticle.css'
 import { Row,Col,Input, Select ,Button ,DatePicker, message } from 'antd';
 import axios from 'axios'
 import servicePath  from '../config/apiUrl'
+import { IsSelectedValue, IsdataProps } from '../interfaces/index'
 
 const { Option } = Select;
 const { TextArea } = Input;
 
-type IsEvent = React.ChangeEvent<HTMLInputElement> |  React.KeyboardEvent<HTMLInputElement>
-type IsTextArea = React.ChangeEvent<HTMLTextAreaElement> | React.KeyboardEvent<HTMLTextAreaElement>
 
-type IsSelectedValue = {
-    id: number,
-    icon: string,
-    orderNum: number,
-    typeName: string
-}
-
-type IsdataProps = {
-    type_id: number,
-    title: string,
-    article_content: string,
-    introduce: string,
-    addTime?: number,
-    view_count?: number
-}
-
-function AddArticle(props:any):JSX.Element {
+const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
     const [articleId,setArticleId] = useState(0)  // 文章的ID，如果是0说明是新增加，如果不是0，说明是修改
     const [articleTitle,setArticleTitle] = useState('')   //文章标题
     const [articleContent , setArticleContent] = useState('')  //markdown的编辑内容
@@ -42,19 +33,19 @@ function AddArticle(props:any):JSX.Element {
 
     }
 
-    const changeTitle = (e: IsEvent) => {
+    const changeTitle = (e: MouseEvent | KeyboardEvent) => {
         let value = (e.target as HTMLInputElement).value;
         setArticleTitle(value)
     }   
 
-    const changeContent = (e:IsTextArea) => {
+    const changeContent = (e: ChangeEvent | KeyboardEvent) => {
         let value = (e.target as HTMLTextAreaElement).value;
         setArticleContent(value)
         let html = marked(value)
         setMarkdownContent(html)
     }
 
-    const changeIntroduce = (e:IsTextArea)=>{
+    const changeIntroduce = (e: ChangeEvent | KeyboardEvent)=>{
         let value = (e.target as HTMLTextAreaElement).value;
         setIntroducemd(value)
         let html = marked(value)
@@ -107,6 +98,21 @@ function AddArticle(props:any):JSX.Element {
                     message.error('文章保存失败')
                 }
             })
+        } else {
+            dataProps.id = articleId;
+            axios({
+                method: 'post',
+                url: servicePath.updateArticle,
+                headers: { 'Access-Control-Allow-Origin':'*' },
+                data: dataProps,
+                withCredentials: true
+            }).then(res => {
+                if(res.data.isScuccess) {
+                    message.success('文章保存成功')
+                } else {
+                    message.error('保存失败')
+                }
+            })
         }
     }
 
@@ -121,7 +127,7 @@ function AddArticle(props:any):JSX.Element {
         }).then(res => {
             if(res.data.data=="没有登录"){
                 localStorage.removeItem('openId')
-                props.history.push('/')  
+                history.push('/')  
             }else{
                 setTypeInfo(res.data.data)
             }   
@@ -129,17 +135,6 @@ function AddArticle(props:any):JSX.Element {
     }
 
     useEffect(() => {
-        // let marked_1 = sessionStorage.getItem("marked");
-        // let marked_2 = sessionStorage.getItem("introduce");
-        // let marked_3 = sessionStorage.getItem("title");
-        // let html_1 = typeof marked_1 === 'string' ? JSON.parse(marked_1) : '';
-        // let html_2 = typeof marked_2 === 'string' ? JSON.parse(marked_2) : '';
-        // let html_3 = typeof marked_3 === 'string' ? JSON.parse(marked_3) : '';
-        // setArticleContent(html_1)
-        // setMarkdownContent(marked(html_1))
-        // setIntroducemd(html_2)
-        // setIntroducehtml(marked(html_2))
-        // setArticleTitle(html_3)
         getTypeInfo() 
     },[])
     

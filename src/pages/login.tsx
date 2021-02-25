@@ -8,8 +8,10 @@ import {
 import axios from 'axios'
 import servicePath  from '../config/apiUrl'
 import '../static/css/login.css'
+import { PageProps } from '../interfaces/index'
 
-function Login(props:any) :JSX.Element{
+
+function Login(props: PageProps) :JSX.Element{
     const [userName , setUserName] = useState<string>();
     const [password , setPassword] = useState<string>();
     const [isLoading, setIsLoading] = useState<boolean>(false);
