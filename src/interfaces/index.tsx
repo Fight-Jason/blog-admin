@@ -20,5 +20,3 @@ export type IsdataProps = {
     addTime?: number,
     view_count?: number
 }
-
-  

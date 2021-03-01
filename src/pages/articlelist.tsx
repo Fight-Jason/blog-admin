@@ -55,7 +55,7 @@ const ArticleList:React.FC<{}> = () => {
                 renderItem={(item: List)=> (
                     <List.Item>
                         <Row className="list-wrap">
-                            <Col span={8}>
+                            <Col span={4}>
                                 {item.title}
                             </Col>
                             <Col span={3}>

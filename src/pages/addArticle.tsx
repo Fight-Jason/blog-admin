@@ -6,13 +6,12 @@ import React,{
     ChangeEvent,
      
 } from 'react';
-import { PageProps } from '../interfaces/index'
 import marked from 'marked';
 import '../static/css/addArticle.css'
 import { Row,Col,Input, Select ,Button ,DatePicker, message } from 'antd';
 import axios from 'axios'
 import servicePath  from '../config/apiUrl'
-import { IsSelectedValue, IsdataProps } from '../interfaces/index'
+import { IsSelectedValue, IsdataProps, PageProps } from '../interfaces/index'
 
 const { Option } = Select;
 const { TextArea } = Input;
