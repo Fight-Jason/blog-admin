@@ -82,6 +82,7 @@ const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
             addTime: (new Date(datetext).getTime())/1000
         }   //传递到接口的参数
 
+        // 新增文章
         if(!articleId) {
             dataProps.view_count = 0;
             axios({
@@ -98,6 +99,7 @@ const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
                 }
             })
         } else {
+            // 修改文章
             dataProps.id = articleId;
             axios({
                 method: 'post',
