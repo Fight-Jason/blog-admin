@@ -12,12 +12,13 @@ import { Row,Col,Input, Select ,Button ,DatePicker, message } from 'antd';
 import axios from 'axios'
 import servicePath  from '../config/apiUrl'
 import { IsSelectedValue, IsdataProps, PageProps } from '../interfaces/index'
+import { match } from 'react-router-dom';
 
 const { Option } = Select;
 const { TextArea } = Input;
 
 
-const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
+const AddArticle: React.FC<PageProps> = ( {history, match}: PageProps) => {
     const [articleId,setArticleId] = useState(0)  // 文章的ID，如果是0说明是新增加，如果不是0，说明是修改
     const [articleTitle,setArticleTitle] = useState('')   //文章标题
     const [articleContent , setArticleContent] = useState('')  //markdown的编辑内容
@@ -52,7 +53,26 @@ const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
     }
 
     const selectTypeHandler = (value:number) => {
+        console.log(value,"value")
         setSelectType(value)
+    }
+
+    const getArticleById  = (id: any) => {
+        axios(servicePath.getArticleById+id,{ 
+            withCredentials: true,
+            headers:{ 'Access-Control-Allow-Origin':'*' }
+        }).then(res => {
+           const temp = res.data.data[0];
+           let { title, article_content, introduce, addTime, typeId } = temp
+           console.log(temp)
+           setArticleTitle(title)
+           setArticleContent(article_content)
+           setMarkdownContent(marked(article_content))
+           setIntroducemd(introduce)
+           setIntroducehtml(marked(introduce))
+           setShowDate(addTime)
+           setSelectType(typeId)
+        })
     }
     
     const saveArticle = ()=>{
@@ -136,7 +156,13 @@ const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
     }
 
     useEffect(() => {
-        getTypeInfo() 
+        getTypeInfo()
+        //获得文章ID
+        let tmpId = match.params.id
+        if(tmpId){
+            setArticleId(tmpId)
+            getArticleById(tmpId)
+        } 
     },[])
     
     marked.setOptions({
@@ -167,7 +193,7 @@ const AddArticle: React.FC<PageProps> = ({ history }: PageProps) => {
                             <Select defaultValue={selectedType} size="large" onChange={selectTypeHandler}>
                                 {
                                     typeInfo.map((item:IsSelectedValue,index)=>{
-                                        return (<Option key={index} value={item.id}>{item.typeName}</Option>)
+                                        return (<Option key={index + 1} value={item.id}>{item.typeName}</Option>)
                                     })
                                 }
                             </Select>

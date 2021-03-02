@@ -4,6 +4,7 @@ import '../static/css/articleList.css'
 import { List, Row, Col, Modal, message, Button, Switch } from 'antd';
 import axios from 'axios'
 import servicePath from '../config/apiUrl'
+import { PageProps } from '../interfaces/index'
 const { confirm } = Modal;
 
 interface List {
@@ -15,16 +16,13 @@ interface List {
     view_count?: number
 }
 
-interface Result {  // interface定义Result接口
-    data: List[]
-}
 
 interface ArticleInfo {
     title: string,
     content: string
 }
 
-const ArticleList: React.FC<{}> = () => {
+const ArticleList: React.FC<PageProps> = ({ history }: PageProps) => {
     const [list, setList] = useState([]);
     const fetchList = () => {
         axios({
@@ -55,6 +53,10 @@ const ArticleList: React.FC<{}> = () => {
                 message.success('没有任何改变')
             }
         })
+    }
+
+    const updateArticle = (id:string) => {
+        history.push(`/index/add/${id}`)
     }
     useEffect(() => {
         fetchList()
@@ -107,8 +109,8 @@ const ArticleList: React.FC<{}> = () => {
                             </Col>
 
                             <Col span={4}>
-                                <Button type="primary" >修改</Button>&nbsp;
-                              <Button onClick={() => { delArticle(item.id) }} >删除 </Button>
+                                <Button type="primary" onClick={()=> {updateArticle(item.id)}}>修改</Button>&nbsp;
+                                <Button onClick={() => { delArticle(item.id) }} >删除 </Button>
                             </Col>
                         </Row>
                     </List.Item>
