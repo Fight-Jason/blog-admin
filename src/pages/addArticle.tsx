@@ -10,9 +10,9 @@ import marked from 'marked';
 import '../static/css/addArticle.css'
 import { Row,Col,Input, Select ,Button ,DatePicker, message } from 'antd';
 import axios from 'axios'
-import servicePath  from '../config/apiUrl'
 import { IsSelectedValue, IsdataProps, PageProps } from '../interfaces/index'
 import { match } from 'react-router-dom';
+import { getArticleById,updateArticle,addArticle,getTypeInfo } from '../config/api'
 
 const { Option } = Select;
 const { TextArea } = Input;
@@ -57,22 +57,20 @@ const AddArticle: React.FC<PageProps> = ( {history, match}: PageProps) => {
         setSelectType(value)
     }
 
-    const getArticleById  = (id: any) => {
-        axios(servicePath.getArticleById+id,{ 
-            withCredentials: true,
-            headers:{ 'Access-Control-Allow-Origin':'*' }
-        }).then(res => {
-           const temp = res.data.data[0];
-           let { title, article_content, introduce, addTime, typeId } = temp
-           console.log(temp)
-           setArticleTitle(title)
-           setArticleContent(article_content)
-           setMarkdownContent(marked(article_content))
-           setIntroducemd(introduce)
-           setIntroducehtml(marked(introduce))
-           setShowDate(addTime)
-           setSelectType(typeId)
-        })
+    const handleGetArticleById  = (id: string) => {
+        getArticleById(id)
+            .then(res => {
+                const temp = res.data.data[0];
+                let { title, article_content, introduce, addTime, typeId } = temp
+                console.log(temp)
+                setArticleTitle(title)
+                setArticleContent(article_content)
+                setMarkdownContent(marked(article_content))
+                setIntroducemd(introduce)
+                setIntroducehtml(marked(introduce))
+                setShowDate(addTime)
+                setSelectType(typeId)
+            })
     }
     
     const saveArticle = ()=>{
@@ -105,63 +103,50 @@ const AddArticle: React.FC<PageProps> = ( {history, match}: PageProps) => {
         // 新增文章
         if(!articleId) {
             dataProps.view_count = 0;
-            axios({
-                method: 'post',
-                url: servicePath.addArticle,
-                data: dataProps,
-                withCredentials: true
-            }).then(res => {
-                setArticleId(res.data.insertId)
-                if(res.data.isSuccess) {
-                    message.success('文章保存成功')
-                } else {
-                    message.error('文章保存失败')
-                }
-            })
+            addArticle(dataProps)
+                .then(res => {
+                    setArticleId(res.data.insertId)
+                    if(res.data.isSuccess) {
+                        message.success('文章保存成功')
+                    } else {
+                        message.error('文章保存失败')
+                    }
+                })
         } else {
             // 修改文章
             dataProps.id = articleId;
-            axios({
-                method: 'post',
-                url: servicePath.updateArticle,
-                headers: { 'Access-Control-Allow-Origin':'*' },
-                data: dataProps,
-                withCredentials: true
-            }).then(res => {
-                if(res.data.isScuccess) {
-                    message.success('文章保存成功')
-                } else {
-                    message.error('保存失败')
-                }
-            })
+            updateArticle(dataProps)
+                .then(res => {
+                    if(res.data.isScuccess) {
+                        message.success('文章保存成功')
+                    } else {
+                        message.error('保存失败')
+                    }
+                })
         }
     }
 
 
     //从中台得到文章类别信息
-    const getTypeInfo =()=>{
-        axios({
-            method: 'get',
-            url: servicePath.getTypeInfo,
-            headers: { 'Access-Control-Allow-Origin':'*' },
-            withCredentials: true   
-        }).then(res => {
-            if(res.data.data=="没有登录"){
-                localStorage.removeItem('openId')
-                history.push('/')  
-            }else{
-                setTypeInfo(res.data.data)
-            }   
-        })
+    const handleGetTypeInfo =()=>{
+        getTypeInfo()
+            .then(res => {
+                if(res.data.data=="没有登录"){
+                    localStorage.removeItem('openId')
+                    history.push('/')  
+                }else{
+                    setTypeInfo(res.data.data)
+                }   
+            })
     }
 
     useEffect(() => {
-        getTypeInfo()
+        handleGetTypeInfo()
         //获得文章ID
         let tmpId = match.params.id
         if(tmpId){
             setArticleId(tmpId)
-            getArticleById(tmpId)
+            handleGetArticleById(tmpId)
         } 
     },[])
     

@@ -10,7 +10,6 @@ import {
     UserOutlined,
     CommentOutlined
 } from '@ant-design/icons';
-import servicePath  from '../config/apiUrl'
 import { PageProps } from '../interfaces/index'
 const { Header, Footer, Sider, Content } = Layout;
 const { SubMenu } = Menu;

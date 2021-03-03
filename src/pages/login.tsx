@@ -5,11 +5,10 @@ import {
     UserOutlined,
     KeyOutlined
 } from '@ant-design/icons';
-import axios from 'axios'
-import servicePath  from '../config/apiUrl'
 import '../static/css/login.css'
 import { PageProps } from '../interfaces/index'
-
+import { checkLogin } from '../config/api'
+import axios from 'axios';
 
 function Login(props: PageProps) :JSX.Element{
     const [userName , setUserName] = useState<string>();
@@ -17,7 +16,7 @@ function Login(props: PageProps) :JSX.Element{
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [typeInfo ,setTypeInfo] = useState([]) // 文章类别信息
 
-    const checkLogin = ()=> {
+    const handleCheckLogin = ()=> {
         if(!userName) {
             return message.error('用户名不能为空')  
         } else if (!password) {
@@ -28,23 +27,19 @@ function Login(props: PageProps) :JSX.Element{
             'password':password  
         }
         setIsLoading(true)
-        axios({
-            method:'post',
-            url:servicePath.checkLogin,
-            data:dataProps,
-            withCredentials: true
-        }).then(
-           res=>{
-                setIsLoading(false)
-                if(res.data.data =='登录成功'){
-                    localStorage.setItem('openId',res.data.openId)
-                    
-                    props.history.push('/index')
-                }else{
-                    message.error('用户名密码错误')
+        checkLogin(dataProps)
+            .then(
+                res=>{
+                    setIsLoading(false)
+                    if(res.data.data =='登录成功'){
+                        localStorage.setItem('openId',res.data.openId)
+                        
+                        props.history.push('/index')
+                    }else{
+                        message.error('用户名密码错误')
+                    }
                 }
-           }
-        )
+            )
         setTimeout(()=>{
             setIsLoading(false)
         },1000)
@@ -72,7 +67,7 @@ function Login(props: PageProps) :JSX.Element{
                         onChange={(e)=> setPassword(e.target.value)}
                     />
                     <br /> <br />
-                    <Button type="primary" size="large" block onClick={checkLogin}>Login in</Button>
+                    <Button type="primary" size="large" block onClick={handleCheckLogin}>Login in</Button>
                 </Card>
 
              </Spin>
