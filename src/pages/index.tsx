@@ -19,12 +19,8 @@ interface MenuInfo {
     keyPath: React.Key[];
     item: React.ReactInstance;
     domEvent: React.MouseEvent<HTMLElement>;
-}
-interface TitleEventEntity {
-    key: string;
-    domEvent: Event;
-}
 
+}
 
 function Index(props: PageProps) {
     const [collapsed,setCollapsed] = useState(false)
@@ -36,7 +32,6 @@ function Index(props: PageProps) {
 
     const handleClickArticle = (event: MenuInfo ) => {
         const { key } = event;
-        console.log(key)
         setSubMenuTitle(key)
         switch(key) {
             case 'addArticle':
