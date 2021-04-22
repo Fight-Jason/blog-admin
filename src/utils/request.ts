@@ -91,6 +91,7 @@ service.interceptors.response.use(
             return Promise.reject(response);
         } else {
             message.error("请求失败")
+            return Promise.reject(error);
         }
     }
 )

@@ -16,7 +16,7 @@ function Login(props: PageProps) :JSX.Element{
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [typeInfo ,setTypeInfo] = useState([]) // 文章类别信息
 
-    const handleCheckLogin = ()=> {
+    const handleCheckLogin = async()=> {
         if(!userName) {
             return message.error('用户名不能为空')  
         } else if (!password) {
@@ -27,19 +27,15 @@ function Login(props: PageProps) :JSX.Element{
             'password':password  
         }
         setIsLoading(true)
-        checkLogin(dataProps)
-            .then(
-                res=>{
-                    setIsLoading(false)
-                    if(res.data.data =='登录成功'){
-                        localStorage.setItem('openId',res.data.openId)
-                        
-                        props.history.push('/index')
-                    }else{
-                        message.error('用户名密码错误')
-                    }
-                }
-            )
+        try {
+            const { msg, openId } = await checkLogin(dataProps);
+            if(msg === '登录成功') {
+                localStorage.setItem('openId', openId)
+                props.history.push('/index')
+            }
+        } catch (err) {
+            Promise.reject(err)
+        }
         setTimeout(()=>{
             setIsLoading(false)
         },1000)
@@ -48,30 +44,32 @@ function Login(props: PageProps) :JSX.Element{
 
     },[])
     return (
-        <div className="login-div">
-             <Spin tip="loading..." spinning={isLoading}>
-                <Card title="Jason Blog System" bordered={true} style={{width: 400}}>
-                    <Input 
-                        id="userName"
-                        size="large"
-                        placeholder="Enter your userName"
-                        prefix={<UserOutlined style={{color:'rgba(0,0,0,.25)'}} />}
-                        onChange={(e)=> setUserName(e.target.value)}
-                    />
-                    <br /><br />
-                    <Input.Password 
-                        id="password"
-                        size="large"
-                        placeholder="Enter your password"
-                        prefix={<KeyOutlined style={{color:'rgba(0,0,0,.25)'}} />}
-                        onChange={(e)=> setPassword(e.target.value)}
-                    />
-                    <br /> <br />
-                    <Button type="primary" size="large" block onClick={handleCheckLogin}>Login in</Button>
-                </Card>
+        <section className="login-wrap">
+            <div className="login-div">
+                <Spin tip="loading..." spinning={isLoading}>
+                    <Card title="Jason Blog System" bordered={true} style={{width: 400}}>
+                        <Input 
+                            id="userName"
+                            size="large"
+                            placeholder="Enter your userName"
+                            prefix={<UserOutlined style={{color:'rgba(0,0,0,.25)'}} />}
+                            onChange={(e)=> setUserName(e.target.value)}
+                        />
+                        <br /><br />
+                        <Input.Password 
+                            id="password"
+                            size="large"
+                            placeholder="Enter your password"
+                            prefix={<KeyOutlined style={{color:'rgba(0,0,0,.25)'}} />}
+                            onChange={(e)=> setPassword(e.target.value)}
+                        />
+                        <br /> <br />
+                        <Button type="primary" size="large" block onClick={handleCheckLogin}>Login in</Button>
+                    </Card>
 
-             </Spin>
-        </div>
+                </Spin>
+            </div>
+        </section>
     )
 }
 export default Login
