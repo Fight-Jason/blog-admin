@@ -28,7 +28,7 @@ function Login(props: PageProps) :JSX.Element{
         }
         setIsLoading(true)
         try {
-            const { msg, openId } = await checkLogin(dataProps);
+            const { data: {msg, openId} } = await checkLogin(dataProps);
             if(msg === '登录成功') {
                 localStorage.setItem('openId', openId)
                 props.history.push('/index')
