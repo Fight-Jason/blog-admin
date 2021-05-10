@@ -13,6 +13,7 @@
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "antd": "^4.12.3",
     "axios": "^0.21.1",
+    "dotenv-cli": "^4.0.0",
     "marked": "^2.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -22,11 +23,11 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "start": "set PORT=9600 && react-scripts start",
+    "start": "set PORT=9600 && dotenv -e .env.production react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dev": "set PORT=9600 && cross-env REACT_APP_ENV=development react-scripts start"
+    "dev": "set PORT=9600 && dotenv -e .env.development react-scripts start"
   },
   "eslintConfig": {
     "extends": [
@@ -46,7 +47,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "cross-env": "^7.0.3"
-  }
+  "devDependencies": {}
 }
